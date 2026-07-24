@@ -157,15 +157,15 @@ object WifiFunctions {
 
             if (!hasScanPermission(context)) {
                 dispatchEvent(activity, EVENT_SCAN_FAILED, JSONObject().put("reason", "permission").toString())
-                return BridgeResponse.error("Missing scan permission (${requiredPermission()})")
+                return BridgeResponse.error("PERMISSION_DENIED", "Missing scan permission (${requiredPermission()})")
             }
 
             val wifi = context.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-                ?: return BridgeResponse.error("WifiManager unavailable")
+                ?: return BridgeResponse.error("EXECUTION_FAILED", "WifiManager unavailable")
 
             if (!wifi.isWifiEnabled) {
                 dispatchEvent(activity, EVENT_SCAN_FAILED, JSONObject().put("reason", "wifi_disabled").toString())
-                return BridgeResponse.error("WiFi is disabled")
+                return BridgeResponse.error("WIFI_DISABLED", "WiFi is disabled")
             }
 
             // Cached last-known results, returned immediately.
@@ -174,7 +174,7 @@ object WifiFunctions {
                 wifi.scanResults ?: emptyList()
             } catch (e: SecurityException) {
                 dispatchEvent(activity, EVENT_SCAN_FAILED, JSONObject().put("reason", "permission").toString())
-                return BridgeResponse.error("SecurityException reading scanResults: ${e.message}")
+                return BridgeResponse.error("PERMISSION_DENIED", "SecurityException reading scanResults: ${e.message}")
             }
             val cachedJson = scanResultsToJson(cached)
 
@@ -246,7 +246,7 @@ object WifiFunctions {
             val context = activity.applicationContext
 
             val wifi = context.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-                ?: return BridgeResponse.error("WifiManager unavailable")
+                ?: return BridgeResponse.error("EXECUTION_FAILED", "WifiManager unavailable")
 
             val info = wifi.connectionInfo
                 ?: return BridgeResponse.success(mapOf("connected" to false))
