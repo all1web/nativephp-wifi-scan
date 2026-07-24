@@ -1,0 +1,67 @@
+{
+    "name": "wifiscan/nativephp-wifi-scan",
+    "description": "WiFi visibility plugin for NativePHP Mobile - scan visible access points (SSID/BSSID/RSSI) and read the connected AP from PHP. Pairs with any Laravel backend.",
+    "type": "nativephp-plugin",
+    "license": "proprietary",
+    "keywords": [
+        "nativephp",
+        "mobile",
+        "wifi",
+        "wifi-scan",
+        "bssid",
+        "rssi",
+        "location",
+        "laravel"
+    ],
+    "authors": [
+        {
+            "name": "Plugin Owner",
+            "email": "owner@example.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0 || ^12.0",
+        "nativephp/mobile": "^3.0 || ^4.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^2.7|^3.0|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WifiScan\\Mobile\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WifiScan\\Mobile\\Tests\\": "tests/"
+        },
+        "files": [
+            "tests/stubs.php"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "WifiScan\\Mobile\\WifiScanServiceProvider"
+            ],
+            "aliases": {
+                "Wifi": "WifiScan\\Mobile\\Facades\\Wifi"
+            }
+        },
+        "nativephp": {
+            "manifest": "nativephp.json"
+        }
+    },
+    "scripts": {
+        "test": "pest"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

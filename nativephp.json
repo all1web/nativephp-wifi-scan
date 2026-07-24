@@ -1,0 +1,57 @@
+{
+    "namespace": "Wifi",
+
+    "bridge_functions": [
+        {
+            "name": "Wifi.Scan",
+            "android": "com.wifiscan.mobile.WifiFunctions.Scan",
+            "android_params": ["activity"],
+            "description": "Return the last cached scan of visible access points immediately and trigger a fresh foreground scan; fresh results are delivered via the NetworksScanned event"
+        },
+        {
+            "name": "Wifi.Current",
+            "android": "com.wifiscan.mobile.WifiFunctions.Current",
+            "android_params": ["activity"],
+            "description": "Read the currently connected access point (SSID/BSSID/RSSI)"
+        },
+        {
+            "name": "Wifi.CheckPermission",
+            "android": "com.wifiscan.mobile.WifiFunctions.CheckPermission",
+            "android_params": ["activity"],
+            "description": "Check whether the app currently holds the permission required to read scan results"
+        },
+        {
+            "name": "Wifi.RequestPermission",
+            "android": "com.wifiscan.mobile.WifiFunctions.RequestPermission",
+            "android_params": ["activity"],
+            "description": "Request the runtime permission required to scan (NEARBY_WIFI_DEVICES on API 33+, ACCESS_FINE_LOCATION on older devices)"
+        }
+    ],
+
+    "android": {
+        "min_version": 23,
+        "permissions": [
+            "android.permission.ACCESS_WIFI_STATE",
+            "android.permission.CHANGE_WIFI_STATE",
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_COARSE_LOCATION",
+            "android.permission.NEARBY_WIFI_DEVICES"
+        ],
+        "features": [
+            {
+                "name": "android.hardware.wifi",
+                "required": false
+            }
+        ],
+        "dependencies": {
+            "implementation": []
+        }
+    },
+
+    "events": [
+        "WifiScan\\Mobile\\Events\\NetworksScanned",
+        "WifiScan\\Mobile\\Events\\ScanFailed",
+        "WifiScan\\Mobile\\Events\\PermissionGranted",
+        "WifiScan\\Mobile\\Events\\PermissionDenied"
+    ]
+}
