@@ -1,99 +1,111 @@
-# WiFi Scan for NativePHP Mobile
+# 📡 WiFi Radar
 
-Read WiFi visibility from PHP in a NativePHP Mobile app: scan the visible access
-points (SSID / BSSID / RSSI) and read the currently connected AP. Pairs with any
-Laravel backend — a small helper turns a scan into a stable location fingerprint
-you can POST to your own signals endpoint.
+**See the WiFi around you — from PHP.**
 
-> **Platform:** Android only. Foreground only. See
-> [docs/DESIGN.md](docs/DESIGN.md) for exactly why, and what iOS can and cannot do.
+Scan the visible access points, read the one you're connected to, and turn what
+the radio can see into a stable fingerprint of *where the phone is*. All of it
+from Laravel, with no Kotlin.
+
+```php
+$networks = Wifi::scan();   // every AP in range: ssid, bssid, rssi, frequency
+$here     = Wifi::current(); // the AP you're actually on
+```
+
+> **This is not the same as knowing you're "on WiFi."** The first-party
+> [`nativephp/mobile-network`](https://nativephp.com/plugins/nativephp/mobile-network)
+> plugin tells you whether the connection is wifi or cellular — four booleans
+> and a type string. It cannot tell you *which* network, how strong it is, or
+> what else is in the air. Android exposes all of that to native apps and it has
+> never been reachable from PHP. WiFi Radar is that capability, delivered to
+> your Laravel code. It is the only WiFi-scanning plugin in the NativePHP
+> ecosystem.
 
 ---
 
-## Install
+## ✨ What you get
 
-```shell
-composer require wifiscan/nativephp-wifi-scan
-```
-
-NativePHP Mobile plugins are **fail-closed**: a plugin is only compiled into your
-app after you explicitly allow-list it. Two steps:
-
-```shell
-# 1. Register the plugin (adds its provider to app/Providers/NativeServiceProvider::plugins())
-php artisan native:plugin:register wifiscan/nativephp-wifi-scan
-```
-
-Confirm your `app/Providers/NativeServiceProvider.php` `plugins()` array lists it:
-
-```php
-public function plugins(): array
-{
-    return [
-        // ...existing plugins...
-        \WifiScan\Mobile\WifiScanServiceProvider::class,
-    ];
-}
-```
-
-```shell
-# 2. Rebuild the native project and run
-php artisan native:install --force
-php artisan native:run
-```
-
-Validate the manifest any time (a malformed `nativephp.json` makes a plugin
-silently vanish at build):
-
-```shell
-php artisan native:plugin:validate
-```
-
-### Config (optional)
-
-```shell
-php artisan vendor:publish --tag=wifi-scan-config
-```
-
-```php
-// config/wifi-scan.php
-'include_hidden' => false, // keep SSID-less APs in scan() results
-'max_results'    => 0,     // cap scan() results (0 = no cap), strongest first
-```
+- 📶 **The full list of nearby access points** — SSID, BSSID, signal strength
+  in dBm, and frequency, strongest first, as tidy PHP objects.
+- 📍 **The connected AP**, including its BSSID — the identifier that actually
+  stays put when SSIDs collide or get renamed.
+- 🧭 **Place fingerprinting built in.** A pure, device-free helper turns a scan
+  into an order-independent hash and scores two observations for similarity, so
+  your backend can answer *"is this the same place as last time?"* — see below.
+- ⚡ **A `NetworksScanned` event** when a fresh scan completes, plus events for
+  scan failures and permission outcomes.
+- 🔐 **The permission split handled for you** — `NEARBY_WIFI_DEVICES` on
+  Android 13+, `ACCESS_FINE_LOCATION` below it, and the location-services check
+  that trips up everyone who only asks for the permission.
+- 🐘 **Honest async semantics.** Android never returns scan results
+  synchronously, so `scan()` hands you the cached list instantly and the fresh
+  one arrives by event. No fake blocking call, no silent empty arrays.
+- 🧪 **Off-device testable.** The fingerprint math and the whole PHP layer run
+  in your test suite with no phone attached.
 
 ---
 
-## Usage
+## 📦 Install
+
+After purchasing, connect Composer to the NativePHP plugin marketplace (your
+credentials are on your
+[Purchased Plugins](https://nativephp.com/dashboard/purchased-plugins)
+dashboard), then:
+
+```bash
+composer config repositories.nativephp-plugins composer https://plugins.nativephp.com
+composer config http-basic.plugins.nativephp.com your-email@example.com your-license-key
+composer require all1web/nativephp-wifi-scan
+```
+
+Register the plugin (NativePHP plugins are opt-in for security) and rebuild:
+
+```bash
+php artisan native:plugin:register all1web/nativephp-wifi-scan
+php artisan native:install android --force
+php artisan native:run android
+```
+
+**The rebuild matters:** the WiFi permissions are merged into your app's
+manifest at build time, so a re-run of an old build won't have them.
+
+<details>
+<summary>Installing from a private repo or a local checkout instead</summary>
+
+```bash
+# Early access via GitHub (licensees with repo access):
+composer config repositories.wifi-scan vcs https://github.com/all1web/nativephp-wifi-scan
+composer require "all1web/nativephp-wifi-scan:dev-main"
+
+# Local checkout (plugin development):
+composer config repositories.wifi-scan path ../nativephp-wifi-scan
+composer require "all1web/nativephp-wifi-scan:*@dev"
+```
+
+</details>
+
+---
+
+## 🧑‍💻 Use it
 
 ```php
 use WifiScan\Mobile\Facades\Wifi;
 use WifiScan\Mobile\Enums\PermissionStatus;
 
-// 1. Make sure you can scan.
+// Ask once — the plugin picks the right permission for the Android version.
 if (Wifi::checkPermission() !== PermissionStatus::Granted) {
-    Wifi::requestPermission(); // shows the system dialog
+    Wifi::requestPermission();
 }
 
-// 2. Scan. Returns the last CACHED list immediately; a fresh scan is triggered
-//    in the background and delivered via the NetworksScanned event.
-$networks = Wifi::scan();      // array<AccessPoint>
-
-foreach ($networks as $ap) {
-    // $ap->ssid, $ap->bssid, $ap->rssi (dBm), $ap->frequency (MHz)
+foreach (Wifi::scan() as $ap) {
+    echo "{$ap->ssid} · {$ap->bssid} · {$ap->rssi} dBm";
 }
 
-// 3. Read the connected AP.
-$ap = Wifi::current();         // ?AccessPoint
-if ($ap) {
-    echo "{$ap->ssid} @ {$ap->bssid} ({$ap->rssi} dBm)";
-}
+$here = Wifi::current();   // ?AccessPoint — null when not associated
 ```
 
-### `scan()` is cached-now, fresh-later
-
-Android never returns scan results synchronously and throttles `startScan()`
-(4 calls / 2 min in the foreground). So `scan()` returns the platform's **last
-cached results** right away, and a fresh scan arrives as an event:
+That's the whole integration. `scan()` returns the platform's **last cached**
+list immediately so your screen has something to render right now; the fresh
+scan lands a moment later as an event:
 
 ```php
 use Native\Mobile\Attributes\OnNative;
@@ -103,89 +115,151 @@ use WifiScan\Mobile\Events\NetworksScanned;
 public function onScan(array $networks, int $count)
 {
     $fresh = (new NetworksScanned($networks, $count))->accessPoints();
-    // ...update your UI...
 }
 ```
 
-### Events
+Why it works that way — and every event, config key, and failure mode — is in
+the **[Reference](docs/REFERENCE.md)**.
 
-| Event | When | Payload |
-|-------|------|---------|
-| `WifiScan\Mobile\Events\NetworksScanned` | a fresh scan completed | `array $networks`, `int $count` |
-| `WifiScan\Mobile\Events\ScanFailed` | scan refused (throttled / WiFi off / no permission) | `string $reason` |
-| `WifiScan\Mobile\Events\PermissionGranted` | user granted the scan permission | `?string $permission` |
-| `WifiScan\Mobile\Events\PermissionDenied` | user denied it | `?string $permission` |
+### Using JavaScript instead? (Inertia / Vue / React)
 
-### Delivering the permission result
-
-`requestPermission()` returns immediately (`granted` if already held, else
-`pending`). The **definitive** grant/deny is delivered by Android to the host
-Activity's `onRequestPermissionsResult`. NativePHP apps typically already route
-this; if yours does not surface it, re-check with `Wifi::checkPermission()` when
-the app resumes — the plugin dispatches `PermissionGranted` on the next `scan()`
-if the grant has landed.
-
----
-
-## Pairing with your Laravel backend: location fingerprints
-
-The set of BSSIDs (AP MAC addresses) a device can see is a strong, cheap
-signature of *where it is* — far more stable than GPS indoors and than SSIDs
-(which collide and change). This package ships a pure helper for it:
-
-```php
-use WifiScan\Mobile\Facades\Wifi;
-use WifiScan\Mobile\Support\BssidFingerprint;
-
-$networks = Wifi::scan();
-
-$fingerprint = BssidFingerprint::hash($networks); // stable, order-independent sha256
-
-// Send it to YOUR endpoint — nothing in this package talks to a server for you.
-Http::withToken($apiToken)->post('https://your-app.example/api/signals/location', [
-    'fingerprint' => $fingerprint,
-    'bssids'      => BssidFingerprint::set($networks), // if you want server-side matching
-    'observed_at' => now()->toIso8601String(),
-]);
-```
-
-On the backend you can compare observations with a similarity score instead of
-requiring an exact match (people move, APs come and go):
-
-```php
-$score = BssidFingerprint::similarity($seenNow, $knownPlace); // 0.0 – 1.0
-if ($score >= 0.6) {
-    // treat as "at the same place"
-}
-```
-
-This is the generic shape of a location-detection integration. The transport,
-auth, storage, and matching thresholds are entirely yours — the plugin only
-provides the on-device signal and the fingerprint primitive.
-
----
-
-## JavaScript (Livewire / Inertia web-view apps)
+The same four calls ship as a JS module — alias it in Vite and use it straight
+from your components:
 
 ```js
-import wifi from '../../vendor/wifiscan/nativephp-wifi-scan/resources/js/wifi.js';
+// vite.config.js → resolve.alias:
+// '@wifi': '/vendor/all1web/nativephp-wifi-scan/resources/js/wifi.js'
+import wifi from '@wifi';
 
-const { networks } = await wifi.scan();
-const current = await wifi.current();
+const { networks } = await wifi.scan();          // JSON string of AP rows
+await wifi.current();
+await wifi.checkPermission();
+await wifi.requestPermission();
+
+document.addEventListener('native-event', (e) => {
+  if (e.detail.event.endsWith('NetworksScanned')) refreshList();
+});
 ```
-
-SuperNative apps use the PHP facade directly and do not need the JS wrapper.
 
 ---
 
-## Requirements
+## 📍 Knowing *where* you are, without GPS
 
-- NativePHP Mobile `^3.0 || ^4.0` (v4 RC installs via the documented
-  `4.0.0-rc.1 as 3.99.99` alias — see [docs/DESIGN.md](docs/DESIGN.md)).
-- Android `minSdk 23`. `NEARBY_WIFI_DEVICES` (API 33+) or `ACCESS_FINE_LOCATION`
-  (older), plus location services enabled, are required to read results.
+The set of BSSIDs a phone can see is a strong, cheap signature of a place. It
+beats GPS indoors, costs no battery, and — unlike SSIDs — the identifiers don't
+collide across the thousand networks called `linksys`. WiFi Radar ships that as
+a first-class primitive:
 
-## License
+```php
+use WifiScan\Mobile\Support\BssidFingerprint;
 
-Proprietary placeholder — see [LICENSE](LICENSE). The owner selects the license
-before publishing.
+// When the user says "this is the office":
+$office = BssidFingerprint::hash(Wifi::scan());   // stable sha256, order-independent
+
+// Later, anywhere:
+$score = BssidFingerprint::similarity(Wifi::scan(), $knownOfficeScan);
+if ($score >= 0.6) {
+    // Same place. Radios come and go, so match on a threshold, not equality.
+}
+```
+
+Nothing in the plugin talks to a server. The transport, the storage, the
+thresholds, and the privacy posture are yours — see
+[Reference → Place fingerprinting](docs/REFERENCE.md#place-fingerprinting) for
+the full recipe including backend matching, and
+[Store review](docs/STORE-REVIEW.md) for what you must declare when you collect
+this.
+
+---
+
+## 🤖 Android only — and that's the honest answer
+
+**There is no public iOS API that lists visible WiFi networks.** Not a
+restricted one, not a hard one — none. `NEHotspotHelper` requires a special
+Apple entitlement granted only for narrow carrier use cases, and even reading
+the *connected* SSID needs the Access WiFi Information capability plus a
+location grant. Any plugin claiming cross-platform WiFi scanning is claiming
+something the platform does not permit.
+
+So this plugin ships no iOS code and declares no iOS support. If Apple ever
+opens the connected-network read, a `current()`-only iOS path is a clean
+addition — `scan()` never will be. Details:
+[docs/PLATFORM-NOTES.md](docs/PLATFORM-NOTES.md).
+
+It is also **foreground only**, by design: Android caps background scans at one
+per 30 minutes and usually refuses them outright, so a background mode would be
+a footgun rather than a feature. The reasoning is written up in
+[docs/DESIGN.md](docs/DESIGN.md).
+
+---
+
+## 📋 Requirements
+
+- NativePHP Mobile `^3.0 || ^4.0`
+- Android 6.0+ (minSdk 23)
+- Runtime permission: `NEARBY_WIFI_DEVICES` (Android 13+) or
+  `ACCESS_FINE_LOCATION` (older), **plus** location services switched on
+- No iOS support (see above)
+
+Version-pinning details, including the v4 RC alias:
+[Reference → Version compatibility](docs/REFERENCE.md#version-compatibility).
+
+---
+
+## 🔬 Digging deeper
+
+| Doc | What's in it |
+|---|---|
+| [Reference](docs/REFERENCE.md) | Full API, events, config, fingerprint recipes, per-stack usage |
+| [Platform notes](docs/PLATFORM-NOTES.md) | Android scan throttling, OEM quirks, MAC randomization, iOS reality |
+| [Store review](docs/STORE-REVIEW.md) | What Google Play review and the Data safety form need from you |
+| [Design notes](docs/DESIGN.md) | Architecture, every decision and why |
+| [Changelog](CHANGELOG.md) | Version history |
+
+## 🛠️ Development
+
+```bash
+composer install
+composer test
+```
+
+## 🔍 Under the hood
+
+<sub>The fine print — everything below is why the five lines of PHP above just
+work.</sub>
+
+<sub>⚙️ **Engineering you don't have to think about:** the scan path registers a
+one-shot `BroadcastReceiver` for `SCAN_RESULTS_AVAILABLE_ACTION` and
+unregisters itself on delivery, so nothing leaks and nothing accumulates across
+scans. `startScan()` throttling (4 calls / 2 min in the foreground) is detected
+and reported back as `scanRequested: false` rather than swallowed, so your UI
+can tell "no refresh is coming" from "no networks found." SSID reads take the
+API-33 `wifiSsid` path with the legacy `SSID` fallback and strip the quoting
+Android adds. The activity is held by a `WeakReference` and event dispatch
+degrades to a no-op when the app isn't on screen instead of crashing. Results
+arrive sorted strongest-first, so a `max_results` cap keeps the nearest radios.</sub>
+
+<sub>🧪 **Verified, not vibes:** a Pest suite pins the bridge contract, the
+JSON-string marshalling, hidden-network filtering, the result cap, permission
+mapping, and every fingerprint property — set normalization, dedup, sentinel-MAC
+rejection, order-independent hashing, and Jaccard similarity — with no device
+required. The native layer's on-device behaviour is validated separately; see
+[Design notes → What is verified vs. what is not](docs/DESIGN.md#what-is-verified-vs-what-is-not)
+for the exact line between the two, stated plainly.</sub>
+
+<sub>🏪 **Review-honest by design:** this plugin asks for a location-class
+permission, which means your app *does* have something to declare — and
+pretending otherwise is how listings get pulled. [Store
+review](docs/STORE-REVIEW.md) tells you exactly what Google Play's Data safety
+form expects, what to write in your permission rationale, and why the
+fingerprint helper is the privacy-preserving way to ship this (hash on device,
+never store raw scans). Your AI pair-programmer gets first-class knowledge too:
+Laravel Boost guidelines ship in the box.</sub>
+
+## 📜 License
+
+**Commercial.** Distributed as a paid plugin via the
+[NativePHP Plugin Marketplace](https://nativephp.com/plugins); each purchase
+grants a license key used for Composer authentication. Licensed by ALL 1, a
+Wyoming corporation. Source access is included for your own development;
+redistribution of source is not — see [`LICENSE`](LICENSE) for the full EULA.

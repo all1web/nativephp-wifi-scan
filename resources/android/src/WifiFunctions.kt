@@ -294,7 +294,7 @@ object WifiFunctions {
      * Request the scan permission. If already held, dispatches PermissionGranted
      * immediately. Otherwise shows the system dialog and returns "pending" — the
      * host Activity's onRequestPermissionsResult drives the final grant/deny
-     * event (see README "Delivering the permission result").
+     * event (see docs/REFERENCE.md "Delivering the permission result").
      */
     class RequestPermission(private val activity: FragmentActivity) : BridgeFunction {
         override fun execute(parameters: Map<String, Any>): Map<String, Any> {

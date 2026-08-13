@@ -1,22 +1,24 @@
 {
-    "name": "wifiscan/nativephp-wifi-scan",
-    "description": "WiFi visibility plugin for NativePHP Mobile - scan visible access points (SSID/BSSID/RSSI) and read the connected AP from PHP. Pairs with any Laravel backend.",
+    "name": "all1web/nativephp-wifi-scan",
+    "description": "WiFi Radar for NativePHP Mobile — scan the visible WiFi access points (SSID/BSSID/RSSI), read the connected AP, and turn what's visible into a stable place fingerprint, straight from Laravel.",
     "type": "nativephp-plugin",
-    "license": "proprietary",
     "keywords": [
         "nativephp",
-        "mobile",
+        "nativephp-mobile",
+        "android",
         "wifi",
         "wifi-scan",
         "bssid",
         "rssi",
-        "location",
+        "indoor-location",
+        "fingerprint",
         "laravel"
     ],
+    "license": "proprietary",
     "authors": [
         {
-            "name": "Plugin Owner",
-            "email": "owner@example.com"
+            "name": "ALL 1",
+            "email": "neo@all1web.com"
         }
     ],
     "require": {
@@ -58,6 +60,10 @@
         "nativephp": {
             "manifest": "nativephp.json"
         }
+    },
+    "support": {
+        "email": "plugins@all1.ai",
+        "issues": "https://github.com/all1web/nativephp-wifi-scan/issues"
     },
     "scripts": {
         "test": "pest"

@@ -1,9 +1,12 @@
 /vendor/
+/node_modules/
 composer.lock
 .phpunit.result.cache
 .phpunit.cache/
-.idea/
-.vscode/
-*.log
 .DS_Store
 Thumbs.db
+/.idea/
+/.vscode/
+*.log
+/.claude/
+/CLAUDE.md

@@ -1,9 +1,23 @@
-# Design notes — WiFi Scan for NativePHP Mobile
+# Design notes — WiFi Radar (`all1web/nativephp-wifi-scan`)
 
 This records the architecture decisions, the platform constraints that forced
 them, and — importantly — **what cannot be verified until this plugin is built
 into a host app and run on a device**. It is written to be read by whoever
 integrates or extends the package next.
+
+Related: [REFERENCE.md](REFERENCE.md) is the API contract,
+[PLATFORM-NOTES.md](PLATFORM-NOTES.md) is the field guide to Android's
+behaviour, and [STORE-REVIEW.md](STORE-REVIEW.md) covers the permission and
+data-safety consequences for a shipping app.
+
+## Identity
+
+The package is `all1web/nativephp-wifi-scan` and sells as **WiFi Radar**. The
+PHP namespace (`WifiScan\Mobile`), the Kotlin package
+(`com.wifiscan.mobile`), and the bridge namespace (`Wifi.*`) predate the
+product name and are deliberately left alone — they are compiled-in identifiers
+whose only requirement is uniqueness against other plugins in the same host
+app. Renaming them would be a breaking change bought for nothing.
 
 ## What it does
 
