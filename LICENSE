@@ -1,96 +1,29 @@
-END USER LICENSE AGREEMENT
-nativephp-wifi-scan ("WiFi Radar")
+MIT License
 
-Copyright (c) 2026 ALL 1, a Wyoming corporation ("Licensor"). All rights reserved.
+Copyright (c) 2026 ALL 1, a Wyoming corporation
 
-This End User License Agreement ("Agreement") governs your use of the
-nativephp-wifi-scan software package, distributed as "WiFi Radar", including
-its PHP, Kotlin, and JavaScript source code, documentation, and assets (the
-"Software"). By purchasing a license, installing, or using the Software, you
-("Licensee") agree to this Agreement.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-1. LICENSE GRANT
-Subject to payment of the applicable license fee and continued compliance with
-this Agreement, Licensor grants Licensee a non-exclusive, non-transferable,
-non-sublicensable, perpetual license to:
-  (a) install and use the Software in Licensee's own application development;
-  (b) compile the Software into applications owned or developed by Licensee
-      and distribute those applications (including through app stores) in
-      compiled, binary form; and
-  (c) make copies of the Software as reasonably necessary for development,
-      testing, and archival purposes.
-Unless a purchased license tier expressly states otherwise, one license is a
-single-seat license: it covers one developer, who may use the Software in an
-unlimited number of their own applications. Each additional developer who
-accesses, modifies, or compiles the Software requires an additional seat.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-2. RESTRICTIONS
-Licensee shall not:
-  (a) publish, distribute, sell, rent, lease, sublicense, or otherwise make
-      the Software's source code available to any third party;
-  (b) offer the Software (or any derivative of it) as a competing product,
-      plugin, template, or development service;
-  (c) remove or alter copyright, license, or attribution notices; or
-  (d) share license credentials or repository access granted with a purchase.
-Access to the Software's source code for Licensee's own development and
-modification is permitted and does not transfer ownership.
-
-3. OWNERSHIP
-The Software is licensed, not sold. Licensor retains all right, title, and
-interest in and to the Software, including all intellectual property rights.
-Modifications Licensee makes for its own use do not grant Licensee ownership
-of the Software.
-
-4. UPDATES AND SUPPORT
-Updates and support channels, if any, are provided as described in the
-purchase listing. Licensor does not guarantee compatibility with any
-particular version of the NativePHP framework, PHP, or Android beyond what
-the listing states.
-
-5. LICENSEE'S DATA-PROTECTION RESPONSIBILITY
-The Software reads WiFi radio information from the device on which Licensee's
-application runs, including access-point identifiers (BSSIDs) that can be used
-to infer a user's location. Licensee is solely responsible for obtaining any
-consent, providing any notice, completing any app-store data-safety or privacy
-declaration, and complying with any law or regulation applicable to that
-collection and to any subsequent transmission, storage, or processing of it.
-The Software transmits nothing on Licensee's behalf and contacts no Licensor
-endpoint. Section 6 applies fully to this Section.
-
-6. WARRANTY DISCLAIMER
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. LICENSOR DOES
-NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE OR UNINTERRUPTED, OR THAT IT
-WILL MEET LICENSEE'S REQUIREMENTS. WIFI SCAN RESULTS, THEIR TIMING, AND THEIR
-AVAILABILITY ARE CONTROLLED ENTIRELY BY THE ANDROID PLATFORM AND THE DEVICE
-MANUFACTURER; LICENSOR DOES NOT WARRANT ANY PARTICULAR SCAN RESULT, SCAN
-FREQUENCY, OR LOCATION-MATCHING ACCURACY.
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-7. LIMITATION OF LIABILITY
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL LICENSOR BE LIABLE
-FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES
-(INCLUDING LOST PROFITS, LOST DATA, OR BUSINESS INTERRUPTION) ARISING OUT OF
-OR RELATED TO THE SOFTWARE OR THIS AGREEMENT, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGES. LICENSOR'S TOTAL AGGREGATE LIABILITY SHALL NOT
-EXCEED THE LICENSE FEES ACTUALLY PAID BY LICENSEE FOR THE SOFTWARE.
+---
 
-8. TERMINATION
-This Agreement terminates automatically if Licensee materially breaches it.
-Upon termination, Licensee must cease distribution of the Software's source
-code and destroy copies in its possession, except that applications already
-distributed in compiled form under Section 1(b) are unaffected.
-
-9. GOVERNING LAW
-This Agreement is governed by the laws of the State of Wyoming, USA, without
-regard to conflict-of-law principles. Exclusive venue for any dispute lies in
-the state or federal courts located in Wyoming, and the parties consent to
-their jurisdiction.
-
-10. ENTIRE AGREEMENT
-This Agreement constitutes the entire agreement between the parties regarding
-the Software and supersedes all prior understandings. If any provision is held
-unenforceable, the remainder continues in effect.
-
-For licensing questions: see the plugin's marketplace listing for the current
-support contact.
+Note on WiFi data: this plugin reads access-point identifiers (BSSIDs) that
+can be used to infer a device's location. Nothing in the Software transmits
+anything anywhere — but if YOUR application transmits or stores scans, the
+consent, disclosure, and app-store data-safety obligations are yours. See
+docs/STORE-REVIEW.md.

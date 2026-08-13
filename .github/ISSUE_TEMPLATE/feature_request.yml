@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a capability for the plugin
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before suggesting, note two hard platform limits that are **not**
+        implementable and will be closed:
+
+        - **iOS WiFi scanning** — no public API exists. [Why](https://github.com/all1web/nativephp-wifi-scan/blob/main/docs/PLATFORM-NOTES.md#8-ios-there-is-no-api)
+        - **Background scanning** — Android caps it at ~1 scan/30 min and
+          usually refuses; event delivery needs a foreground Activity.
+        - **Connecting to networks / reading passwords** — out of scope and
+          heavily restricted by Android.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: The use case, not the proposed API.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like the plugin to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What are you doing today instead?

@@ -11,6 +11,7 @@ use WifiScan\Mobile\Contracts\WifiInterface;
  * @method static array<int, \WifiScan\Mobile\Data\AccessPoint> scan()
  * @method static \WifiScan\Mobile\Data\AccessPoint|null current()
  * @method static \WifiScan\Mobile\Enums\PermissionStatus checkPermission()
+ * @method static array{status: \WifiScan\Mobile\Enums\PermissionStatus, requiredPermission: ?string, locationServicesEnabled: ?bool} permissionDetails()
  * @method static \WifiScan\Mobile\Enums\PermissionStatus requestPermission()
  *
  * @see \WifiScan\Mobile\Wifi

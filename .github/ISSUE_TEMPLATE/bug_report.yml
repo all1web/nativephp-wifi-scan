@@ -1,0 +1,82 @@
+name: Bug report
+description: Something isn't working. Please run the doctor first.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before opening this issue**, please confirm you've done these — the
+        vast majority of reports are answered by them:
+
+        1. Run `php artisan wifi-scan:doctor` and fix anything it flags
+        2. Read [TROUBLESHOOTING.md](https://github.com/all1web/nativephp-wifi-scan/blob/main/docs/TROUBLESHOOTING.md)
+        3. Confirm you are on a **physical Android device** (emulators have no
+           WiFi radio and always return nothing)
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I ran `php artisan wifi-scan:doctor` and it reported no issues (or I've pasted its output below)
+          required: true
+        - label: I'm testing on a physical Android device, not an emulator
+          required: true
+        - label: Device Location services are switched ON (separate from the permission)
+          required: true
+        - label: I rebuilt with `php artisan native:install android --force` after installing the plugin
+          required: true
+        - label: I read TROUBLESHOOTING.md and my symptom isn't covered there
+          required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: Full output of `php artisan wifi-scan:doctor`
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: "Samsung Galaxy S23, Android 14 (API 34)"
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Plugin and nativephp/mobile versions
+      placeholder: "wifi-scan v0.2.0, nativephp/mobile 4.0.0-rc.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected vs what happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Minimal code that reproduces it
+      render: php
+
+  - type: textarea
+    id: logcat
+    attributes:
+      label: Logcat
+      description: "Output of `adb logcat -s WifiScan` around the failure"
+      render: shell
+
+  - type: checkboxes
+    id: second-device
+    attributes:
+      label: Reproducibility
+      options:
+        - label: I reproduced this on a second physical device (OEM behaviour varies a lot)

@@ -1,0 +1,21 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🩺 Troubleshooting — start here
+    url: https://github.com/all1web/nativephp-wifi-scan/blob/main/docs/TROUBLESHOOTING.md
+    about: Every known failure as symptom → cause → fix. Most issues are answered here.
+
+  - name: ❓ FAQ
+    url: https://github.com/all1web/nativephp-wifi-scan/blob/main/docs/FAQ.md
+    about: "Does it work on iOS? Why is scan() empty? Why does the fingerprint not match? Answered."
+
+  - name: 🍏 iOS support
+    url: https://github.com/all1web/nativephp-wifi-scan/blob/main/docs/PLATFORM-NOTES.md#8-ios-there-is-no-api
+    about: There is no public iOS API for WiFi scanning. This is permanent — please read before filing.
+
+  - name: 🏪 Google Play / Data safety questions
+    url: https://github.com/all1web/nativephp-wifi-scan/blob/main/docs/STORE-REVIEW.md
+    about: Permissions, Data safety form, prominent disclosure, neverForLocation.
+
+  - name: 💬 Questions and ideas
+    url: https://github.com/all1web/nativephp-wifi-scan/discussions
+    about: For usage questions and feature ideas — issues are for reproducible bugs.

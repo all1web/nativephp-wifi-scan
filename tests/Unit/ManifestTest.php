@@ -30,7 +30,7 @@ it('declares a valid namespace identifier', function () {
 it('is published under the vendor identity', function () {
     expect($this->composer['name'])->toBe('all1web/nativephp-wifi-scan')
         ->and($this->composer['type'])->toBe('nativephp-plugin')
-        ->and($this->composer['license'])->toBe('proprietary');
+        ->and($this->composer['license'])->toBe('MIT');
 });
 
 it('carries the marketplace support block', function () {
@@ -38,11 +38,11 @@ it('carries the marketplace support block', function () {
         ->and($this->composer['support']['issues'])->toStartWith('https://github.com/all1web/');
 });
 
-it('ships a licence file with real terms', function () {
+it('ships the MIT licence naming the owner', function () {
     $license = file_get_contents($this->root.'/LICENSE');
 
-    expect($license)->toContain('END USER LICENSE AGREEMENT')
-        ->and(strlen($license))->toBeGreaterThan(2000);
+    expect($license)->toContain('MIT License')
+        ->and($license)->toContain('ALL 1');
 });
 
 it('constrains nativephp/mobile with the alias-safe range', function () {
@@ -135,16 +135,21 @@ it('declares an android floor and claims no ios support', function () {
     expect(is_dir($this->root.'/resources/ios'))->toBeFalse();
 });
 
-it('exports one JS function per bridge function', function () {
+it('exports one JS function per bridge function, over the HTTP bridge', function () {
     $js = file_get_contents($this->root.'/resources/js/wifi.js');
 
     foreach ($this->manifest['bridge_functions'] as $fn) {
         [, $short] = explode('.', $fn['name']);
         $method = lcfirst($short);
 
-        expect($js)->toContain("{$method}:")
+        expect($js)->toContain("export async function {$method}(")
             ->and($js)->toContain("'{$fn['name']}'");
     }
+
+    // The transport the installed runtime actually serves. window.nativephp
+    // does not exist — it shipped in v0.1.0 and never worked.
+    expect($js)->toContain("'/_native/api/call'")
+        ->and($js)->not->toContain('window.nativephp');
 });
 
 it('ships boost guidelines naming the current package', function () {

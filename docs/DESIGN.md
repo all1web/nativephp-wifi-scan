@@ -127,7 +127,19 @@ shipped plugins (`orchestra/testbench ^10.0`, `pest ^2.7|^3.0|^4.0`).
 
 ## What is verified vs. what is NOT
 
-**Verified off-device (24 passing Pest tests):**
+**Verified off-device (57 passing Pest tests):**
+
+- The bridge contract against the shapes the *installed* NativePHP runtime
+  returns — read from `BridgeRouter.kt` in vendor, not assumed: `success()`
+  returns the payload bare, `error()` wraps as `{status, code, message, data}`.
+  Every getter collapses an error envelope to its empty value.
+- Event constructor parameter names, because the runtime binds them **by name**
+  (`NativeComponent::makeEventInstance`) — a rename would silently break
+  hydration on-device with no compile-time signal.
+- The `wifi-scan:doctor` command registers and runs.
+- Manifest ↔ `BridgeFunction` enum bijection, Kotlin FQN resolution, one JS
+  export per bridge function over the runtime's real `/_native/api/call`
+  transport, the permission set, and the structural absence of any iOS claim.
 
 - `AccessPoint` construction, BSSID lowercasing, graceful degradation, toArray
   round-trip, collection reindexing.
@@ -157,8 +169,7 @@ radio and return empty scans):**
 6. `current()` returning a real SSID/BSSID when associated, and the all-zero
    BSSID sentinel handling when not.
 
-**On-device validation checklist:** build a host app, allow-list the provider,
-`native:plugin:validate` clean, then on a real phone verify (a) `scan()` returns
-a non-empty cached list after a first foreground scan, (b) `NetworksScanned`
-fires within a few seconds, (c) `current()` matches the connected network, and
-(d) toggling the permission flips `checkPermission()`.
+**On-device validation checklist:** the full runbook, with explicit pass
+conditions for all ten checks, lives in
+[DEVICE-VALIDATION.md](DEVICE-VALIDATION.md). It has **not been run** as of
+v0.2.0.

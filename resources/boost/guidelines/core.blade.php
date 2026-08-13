@@ -3,10 +3,17 @@
 WiFi visibility for NativePHP Mobile: scan visible access points (SSID/BSSID/RSSI)
 and read the connected AP, from PHP. Android only, foreground only.
 
+Free, MIT-licensed. Install with a plain `composer require all1web/nativephp-wifi-scan`
+then `php artisan native:plugin:register all1web/nativephp-wifi-scan` and
+`php artisan native:install android --force` (the rebuild is required — permissions
+are merged at build time).
+
 Always call `checkPermission()` / `requestPermission()` before `scan()` — without
 the grant the platform returns an empty list rather than an error. On Android 9+
 location services must ALSO be switched on; that is a separate condition from the
-permission and is the most common cause of an unexpectedly empty scan.
+permission and is the most common cause of an unexpectedly empty scan. Use
+`Wifi::permissionDetails()` to check both at once, and suggest
+`php artisan wifi-scan:doctor` whenever a user reports "it returns nothing".
 
 ### PHP Usage (Livewire/Blade)
 
@@ -66,8 +73,12 @@ $hash = BssidFingerprint::hash(Wifi::scan()); // stable, order-independent
 ### Events
 
 - `WifiScan\Mobile\Events\NetworksScanned` — fresh scan done (payload: `array $networks`, `int $count`)
-- `WifiScan\Mobile\Events\ScanFailed` — scan refused (payload: `string $reason`)
+- `WifiScan\Mobile\Events\ScanFailed` — scan refused (payload: `string $reason`: `permission`, `wifi_disabled`, `results_not_updated`, `unknown`)
 - `WifiScan\Mobile\Events\PermissionGranted` / `PermissionDenied` — permission outcome
+
+Events are BEST-EFFORT (they need a live foreground Activity, and permission
+events depend on host-app routing). Never gate a flow solely on an event —
+re-check with `checkPermission()` on resume and read the cached `scan()` list.
 
 ### Constraints
 
@@ -76,6 +87,7 @@ $hash = BssidFingerprint::hash(Wifi::scan()); // stable, order-independent
 - `scan()` returns the *cached* list synchronously; a fresh scan is delivered by `NetworksScanned`.
 - Requires `NEARBY_WIFI_DEVICES` (API 33+) or `ACCESS_FINE_LOCATION` (older), and location services on.
 - Throttling is not a failure: `scan()` still returns cached results and no `NetworksScanned` follows.
-- Off-device (browser, CI, `artisan test`) every call is a safe no-op: `[]`, `null`, `PermissionStatus::Unknown`.
+- Off-device (browser, CI, `artisan test`) every call is a safe no-op: `[]`, `null`, `PermissionStatus::Unknown`. Native errors collapse to the same values — nothing throws.
+- Emulators have NO WiFi radio: scans always return empty there. Real device required.
 - For place detection, set `include_hidden => true` and leave `max_results` at 0 — weak and hidden APs make a fingerprint distinctive.
 - Match places with `BssidFingerprint::similarity()` and a threshold (~0.6), not with hash equality; one rebooted neighbouring router changes the hash.

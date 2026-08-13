@@ -1,6 +1,6 @@
 {
     "name": "@all1web/nativephp-wifi-scan",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "JS wrapper for the WiFi Radar plugin bridge (WiFi access-point scanning for NativePHP Mobile).",
     "type": "module",
     "main": "resources/js/wifi.js",
@@ -10,5 +10,5 @@
     "files": [
         "resources/js"
     ],
-    "license": "SEE LICENSE IN LICENSE"
+    "license": "MIT"
 }

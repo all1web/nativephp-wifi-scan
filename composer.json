@@ -1,6 +1,6 @@
 {
     "name": "all1web/nativephp-wifi-scan",
-    "description": "WiFi Radar for NativePHP Mobile — scan the visible WiFi access points (SSID/BSSID/RSSI), read the connected AP, and turn what's visible into a stable place fingerprint, straight from Laravel.",
+    "description": "WiFi Radar for NativePHP Mobile — free MIT plugin: scan the visible WiFi access points (SSID/BSSID/RSSI), read the connected AP, and turn what's visible into a stable place fingerprint, straight from Laravel.",
     "type": "nativephp-plugin",
     "keywords": [
         "nativephp",
@@ -14,7 +14,7 @@
         "fingerprint",
         "laravel"
     ],
-    "license": "proprietary",
+    "license": "MIT",
     "authors": [
         {
             "name": "ALL 1",

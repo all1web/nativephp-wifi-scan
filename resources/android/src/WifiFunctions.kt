@@ -51,6 +51,78 @@ object WifiFunctions {
     }
 
     // -----------------------------------------------------------------------
+    // Scan-results receiver — SINGLE SLOT
+    // -----------------------------------------------------------------------
+    //
+    // Every scan() call wants fresh results, but registering a receiver per
+    // call would stack them: a throttled request leaves its receiver armed,
+    // and when a broadcast finally arrives (ours, another app's, or the OS's
+    // periodic scan) every armed receiver fires — N duplicate NetworksScanned
+    // events for one scan. So exactly one receiver slot exists. A slot left
+    // armed after a throttled request is deliberately kept: any scan
+    // completing later still delivers fresh results through it, once.
+
+    private val receiverLock = Any()
+    private var scanReceiver: BroadcastReceiver? = null
+
+    private fun registerScanReceiver(appContext: Context, wifi: WifiManager) {
+        synchronized(receiverLock) {
+            if (scanReceiver != null) return // already armed — one slot only
+
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(ctx: Context, intent: Intent) {
+                    synchronized(receiverLock) {
+                        if (scanReceiver === this) scanReceiver = null
+                    }
+                    try {
+                        appContext.unregisterReceiver(this)
+                    } catch (_: IllegalArgumentException) {
+                        // already unregistered
+                    }
+
+                    // API 23+: false means the scan FAILED and scanResults still
+                    // holds the previous batch. Absent extra defaults to true —
+                    // deliver rather than drop when an OEM omits it.
+                    val updated = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, true)
+                    val live = ActivityHolder.get()
+                        ?: return Unit.also { Log.d(TAG, "No live activity; dropping scan result (foreground-only)") }
+
+                    if (!updated) {
+                        // Honest contract: don't present the stale cache as fresh.
+                        dispatchEvent(live, EVENT_SCAN_FAILED,
+                            JSONObject().put("reason", "results_not_updated").toString())
+                        return
+                    }
+
+                    val fresh = try {
+                        @Suppress("DEPRECATION")
+                        wifi.scanResults ?: emptyList()
+                    } catch (e: SecurityException) {
+                        Log.e(TAG, "SecurityException reading fresh scanResults: ${e.message}")
+                        dispatchEvent(live, EVENT_SCAN_FAILED,
+                            JSONObject().put("reason", "permission").toString())
+                        return
+                    }
+                    val json = scanResultsToJson(fresh)
+                    val payload = JSONObject()
+                        .put("networks", json)
+                        .put("count", json.length())
+                    dispatchEvent(live, EVENT_NETWORKS_SCANNED, payload.toString())
+                }
+            }
+
+            scanReceiver = receiver
+            val filter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                appContext.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                @Suppress("UnspecifiedRegisterReceiverFlag")
+                appContext.registerReceiver(receiver, filter)
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
     // Permission model
     // -----------------------------------------------------------------------
 
@@ -178,8 +250,8 @@ object WifiFunctions {
             }
             val cachedJson = scanResultsToJson(cached)
 
-            // Register a one-shot receiver for fresh results, then request a scan.
-            registerScanReceiver(activity, wifi)
+            // Arm the single-slot receiver for fresh results, then request a scan.
+            registerScanReceiver(context, wifi)
 
             @Suppress("DEPRECATION")
             val started = try {
@@ -203,39 +275,6 @@ object WifiFunctions {
             )
         }
 
-        private fun registerScanReceiver(activity: FragmentActivity, wifi: WifiManager) {
-            val appContext = activity.applicationContext
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(ctx: Context, intent: Intent) {
-                    try {
-                        appContext.unregisterReceiver(this)
-                    } catch (_: IllegalArgumentException) {
-                        // already unregistered
-                    }
-                    val fresh = try {
-                        @Suppress("DEPRECATION")
-                        wifi.scanResults ?: emptyList()
-                    } catch (e: SecurityException) {
-                        Log.e(TAG, "SecurityException reading fresh scanResults: ${e.message}")
-                        return
-                    }
-                    val json = scanResultsToJson(fresh)
-                    val payload = JSONObject()
-                        .put("networks", json)
-                        .put("count", json.length())
-                    ActivityHolder.get()?.let { live ->
-                        dispatchEvent(live, EVENT_NETWORKS_SCANNED, payload.toString())
-                    } ?: Log.d(TAG, "No live activity to dispatch NetworksScanned; dropping (foreground-only)")
-                }
-            }
-            val filter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                appContext.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
-            } else {
-                @Suppress("UnspecifiedRegisterReceiverFlag")
-                appContext.registerReceiver(receiver, filter)
-            }
-        }
     }
 
     /** Read the currently connected access point. */

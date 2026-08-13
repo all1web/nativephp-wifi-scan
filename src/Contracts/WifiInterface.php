@@ -28,6 +28,14 @@ interface WifiInterface
     public function checkPermission(): PermissionStatus;
 
     /**
+     * Permission status plus the required-permission name and whether device
+     * location services are enabled (null off-device).
+     *
+     * @return array{status: PermissionStatus, requiredPermission: ?string, locationServicesEnabled: ?bool}
+     */
+    public function permissionDetails(): array;
+
+    /**
      * Request the runtime permission required to scan. The definitive result is
      * delivered later via the PermissionGranted / PermissionDenied events.
      */

@@ -5,6 +5,72 @@ documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com); versions follow
 [semver](https://semver.org).
 
+## v0.2.0 — 2026-08-13
+
+**Now free and MIT-licensed.** No license key, no seat limits, no purchase step.
+
+> The PHP layer, bridge contract, and fingerprint primitives are covered by 57
+> passing tests. The native Android layer is structurally pinned but
+> **on-device validation is still outstanding** — see
+> [docs/DEVICE-VALIDATION.md](docs/DEVICE-VALIDATION.md) for the runbook and
+> [docs/DESIGN.md](docs/DESIGN.md#what-is-verified-vs-what-is-not) for the exact
+> line between verified and unverified.
+
+### Changed
+
+- **Licence: proprietary EULA → MIT.** `composer.json`, `package.json`, and
+  `LICENSE` updated; install is now a plain `composer require` with no
+  marketplace credentials.
+- **JS wrapper rewritten against the transport the runtime actually serves.**
+  v0.1.0 called a `window.nativephp.call()` global that does not exist — the
+  JS path could never have worked. It now POSTs to `/_native/api/call` with the
+  CSRF header, matching the shipped share-target/widgets plugins, decodes the
+  `networks` JSON string for you, and degrades to safe empty values instead of
+  throwing when the bridge is absent.
+
+### Fixed
+
+- **Duplicate `NetworksScanned` events.** Each `scan()` used to register its own
+  one-shot `BroadcastReceiver`. Throttled calls left receivers armed, so one
+  later broadcast fired all of them. Replaced with a synchronized single-slot
+  receiver: one registration ever, re-armed after each delivery.
+- **Stale results presented as fresh.** The scan-complete broadcast carries
+  `EXTRA_RESULTS_UPDATED`; when `false`, the scan failed and `scanResults` still
+  holds the previous batch. The plugin now dispatches
+  `ScanFailed('results_not_updated')` instead of a `NetworksScanned` carrying
+  the old cache. A missing flag is treated as `true` (deliver rather than drop).
+- **Error envelopes could leak into app code.** `BridgeResponse.error()` returns
+  `{status: "error", code, message, data}`; the PHP `call()` did not unwrap it,
+  so `checkPermission()` could see `status: "error"`. Now unwrapped defensively,
+  matching the device-proven share-target pattern — every error collapses to the
+  same empty value as being off-device.
+- The scan receiver is registered against the **application context** rather
+  than the Activity, so it cannot pin an Activity or leak across rotation.
+
+### Added
+
+- **`php artisan wifi-scan:doctor`** — diagnoses allowlist registration,
+  generated-manifest permissions, runtime bridge, scan permission, location
+  services, and config, printing the exact fix for each broken link. Exit code
+  1 on any problem, so it works in CI.
+- **`Wifi::permissionDetails()`** — status plus `requiredPermission` and
+  `locationServicesEnabled` in one call. Location services being off is the most
+  common cause of an empty scan and was previously only reachable from JS.
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — 15 failure modes as
+  symptom → cause → fix.
+- **[docs/FAQ.md](docs/FAQ.md)** — every predictable question, answered.
+- **[docs/DEVICE-VALIDATION.md](docs/DEVICE-VALIDATION.md)** — the on-device
+  test runbook.
+- Explicit **limits and disclaimers** section in the reference: OS-controlled
+  timing, best-effort events, OEM variance, unverified R8 behaviour, fingerprint
+  accuracy caveats.
+- GitHub Actions test matrix (PHP 8.2/8.3/8.4 × lowest/stable), issue templates
+  that require doctor output and route common questions to the docs, and
+  `SECURITY.md`.
+- Tests: bridge-contract error-envelope collapse, malformed JSON, event
+  constructor-parameter names (the runtime binds by name), doctor registration,
+  documented-reason coverage. 43 → 57.
+
 ## v0.1.0 — 2026-08-13
 
 > The PHP layer and the fingerprint primitives are covered by the test suite.

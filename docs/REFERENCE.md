@@ -18,7 +18,20 @@ use WifiScan\Mobile\Facades\Wifi;
 | `Wifi::scan()` | `array<int, AccessPoint>` | The platform's **cached** list, immediately. Also triggers a fresh scan whose results arrive via `NetworksScanned`. |
 | `Wifi::current()` | `?AccessPoint` | The connected AP, or `null` when not associated. |
 | `Wifi::checkPermission()` | `PermissionStatus` | Does the app hold a permission that lets it read scan results? |
+| `Wifi::permissionDetails()` | `array` | `checkPermission()` **plus** the required-permission name and `locationServicesEnabled` — the second switch that also gates results. |
 | `Wifi::requestPermission()` | `PermissionStatus` | Shows the system dialog. Returns `Granted` if already held, otherwise `Pending`. |
+
+`permissionDetails()` is the call to reach for when a scan comes back empty and
+you need to know *why* without guessing:
+
+```php
+$d = Wifi::permissionDetails();
+// [
+//   'status'                  => PermissionStatus::Granted,
+//   'requiredPermission'      => 'android.permission.NEARBY_WIFI_DEVICES',
+//   'locationServicesEnabled' => true,   // null off-device
+// ]
+```
 
 The facade resolves `WifiScan\Mobile\Contracts\WifiInterface`, bound as a
 singleton — inject the interface instead of the facade wherever you prefer
@@ -29,6 +42,27 @@ when `nativephp_call()` doesn't exist (your dev machine, CI, `php artisan
 test`). `scan()` gives `[]`, `current()` gives `null`, the permission calls give
 `PermissionStatus::Unknown`. Nothing throws, so the same Blade/Livewire code
 renders in a browser and on a phone.
+
+**Error behaviour is identical.** If the native layer returns an error envelope
+(permission denied, WiFi off, `WifiManager` unavailable), the PHP layer collapses
+it to the same empty values rather than throwing or leaking `"error"` into your
+view. This is deliberate: a scan failing is a normal runtime condition on a
+mobile device, not an exceptional one. Use the `ScanFailed` event when you need
+the reason, and `adb logcat -s WifiScan` when debugging.
+
+## Diagnostics
+
+```bash
+php artisan wifi-scan:doctor
+```
+
+Walks the whole chain — allowlist registration → generated Android manifest
+permissions → runtime bridge → scan permission → location services → config —
+and prints the exact fix for each broken link. Exit code `0` when clean, `1`
+when anything is wrong, so it works in CI.
+
+It is the first thing to run for any "it doesn't work" report, and the first
+thing we'll ask for in an issue.
 
 ### `AccessPoint`
 
@@ -87,7 +121,15 @@ delivers plain arrays. `accessPoints()` turns them into `AccessPoint`s.
 |---|---|---|
 | `permission` | the scan permission isn't held (or was revoked mid-flight) | call `requestPermission()` |
 | `wifi_disabled` | the WiFi radio is switched off | prompt the user to turn WiFi on |
+| `results_not_updated` | the platform finished the scan but reported **failure** — `scanResults` still holds the previous batch | keep showing the cached list; it is stale, not wrong. Common on OEMs under battery saver |
 | `unknown` | anything else | the cached list from `scan()` is still valid |
+
+**Why `results_not_updated` exists.** Android's scan-complete broadcast carries
+an `EXTRA_RESULTS_UPDATED` flag. When it is `false`, the scan failed and the
+results list is the *old* one. Presenting that as a fresh scan would be a lie,
+so the plugin dispatches `ScanFailed` instead of `NetworksScanned`. If an OEM
+omits the flag entirely we treat it as `true` and deliver — dropping real
+results would be the worse failure.
 
 Note that platform **throttling** is not a `ScanFailed` — it isn't a failure.
 `scan()` still returns the cached list; the JS layer sees `scanRequested:
@@ -294,3 +336,48 @@ source of truth on the PHP side.
 `networks` crosses as a JSON string on purpose: the bridge marshals
 `Map<String, Any>`, and nested arrays survive most reliably as a string. The PHP
 decoder accepts either a string or an already-decoded array.
+
+The native layer builds responses with the runtime's `BridgeResponse`: `success`
+returns the payload **bare**, `error` wraps it as
+`{status, code, message, data}`. The PHP `call()` unwraps `data` defensively,
+which is why every error collapses uniformly to an empty result. **Never name a
+payload key `data`** in a future bridge function or the unwrap will eat it.
+
+---
+
+## Limits and disclaimers
+
+Stated plainly so you can design around them rather than discover them.
+
+**The OS decides, not this plugin.** Scan availability, timing, throttling, and
+broadcast delivery are entirely controlled by Android and the device
+manufacturer. No library can guarantee a scan completes, or completes within any
+particular time. Build UI that works from the cached list and treats fresh
+results as an improvement.
+
+**Events are best-effort.** `NetworksScanned`, `PermissionGranted`, and
+`PermissionDenied` depend on a live foreground Activity and, for permission
+events, on how the host app routes `onRequestPermissionsResult` — which varies
+by NativePHP version and app template. **Always re-check with
+`checkPermission()` on resume rather than relying on the event.** The pull path
+is the supported one; events are the optimization.
+
+**OEM variance is real.** Battery managers on Xiaomi, Huawei, Samsung and others
+can suppress scan broadcasts entirely. Devices in battery-saver mode may report
+`results_not_updated` indefinitely. Behaviour verified on one handset does not
+generalise to all.
+
+**Release builds are not verified against R8.** If you build with
+`minifyEnabled true` and the bridge functions go missing, add
+`-keep class com.wifiscan.mobile.** { *; }` to `proguard-rules.pro`. Test a
+release APK before publishing.
+
+**No iOS, permanently, for `scan()`.** See
+[PLATFORM-NOTES.md §8](PLATFORM-NOTES.md#8-ios-there-is-no-api).
+
+**Fingerprint accuracy is not guaranteed.** BSSID similarity is a heuristic. Its
+accuracy depends on AP density, environment churn, and your threshold. Do not
+use it as a sole factor for anything safety-critical, access-controlling, or
+legally consequential.
+
+**Emulators cannot exercise any of this.** No WiFi radio, no meaningful results.

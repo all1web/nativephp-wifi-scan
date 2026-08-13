@@ -73,6 +73,27 @@ class Wifi implements WifiInterface
     }
 
     /**
+     * Full permission picture, including whether device location services are
+     * switched on — a SEPARATE condition that also gates scan results on
+     * Android 9+ and is the most common cause of an empty list.
+     *
+     * Off-device the unknown state is explicit: status Unknown and null for
+     * both detail fields.
+     *
+     * @return array{status: PermissionStatus, requiredPermission: ?string, locationServicesEnabled: ?bool}
+     */
+    public function permissionDetails(): array
+    {
+        $result = $this->call(BridgeFunction::CheckPermission);
+
+        return [
+            'status' => PermissionStatus::fromNative($result['status'] ?? null),
+            'requiredPermission' => isset($result['requiredPermission']) ? (string) $result['requiredPermission'] : null,
+            'locationServicesEnabled' => isset($result['locationServicesEnabled']) ? (bool) $result['locationServicesEnabled'] : null,
+        ];
+    }
+
+    /**
      * Request the runtime permission required to scan. The definitive result is
      * delivered later via the PermissionGranted / PermissionDenied events; this
      * return value is the immediate status (granted if already held, else
@@ -118,12 +139,24 @@ class Wifi implements WifiInterface
             return [];
         }
 
-        $result = nativephp_call($function->value, json_encode($data));
+        $result = nativephp_call($function->value, json_encode($data ?: (object) []));
 
         if (! $result) {
             return [];
         }
 
-        return json_decode($result, true) ?? [];
+        $decoded = json_decode($result, true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        // BridgeResponse.success returns the payload bare; BridgeResponse.error
+        // wraps as {status, code, message, data: {}}. The defensive unwrap makes
+        // every error collapse to [] uniformly — never name a payload key "data".
+        // (Same device-proven pattern as the share-target plugin.)
+        $data = $decoded['data'] ?? $decoded;
+
+        return is_array($data) ? $data : [];
     }
 }

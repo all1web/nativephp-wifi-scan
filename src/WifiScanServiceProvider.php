@@ -27,6 +27,10 @@ class WifiScanServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/wifi-scan.php' => config_path('wifi-scan.php'),
             ], 'wifi-scan-config');
+
+            $this->commands([
+                Commands\DoctorCommand::class,
+            ]);
         }
     }
 }
