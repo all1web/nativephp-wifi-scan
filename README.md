@@ -13,7 +13,7 @@ $networks = Wifi::scan();   // every AP in range: ssid, bssid, rssi, frequency
 $here     = Wifi::current(); // the AP you're actually on
 ```
 
-![One call from PHP → native radio sweep → ranked network list in your code](https://github.com/all1web/plugin-assets/raw/main/wifi-scan/flow.png)
+![Radios in range → one call from PHP → a place you recognise](https://github.com/all1web/plugin-assets/raw/main/wifi-scan/flow.png)
 
 > **This is not the same as knowing you're "on WiFi."** The first-party
 > [`nativephp/mobile-network`](https://nativephp.com/plugins/nativephp/mobile-network)
