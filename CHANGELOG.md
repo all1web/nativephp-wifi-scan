@@ -40,6 +40,8 @@ Initial release.
   function for Inertia/Vue/React front-ends, with the same names as the PHP
   facade.
 - **Laravel Boost guidelines** so AI pair-programmers get the API right.
+- Isometric-diorama listing art (`art/hero.svg`, `art/flow.svg` + rendered
+  PNGs), mirrored to the public asset host the README links against.
 - Docs: [README](README.md), [Reference](docs/REFERENCE.md),
   [Platform notes](docs/PLATFORM-NOTES.md),
   [Store review & data safety](docs/STORE-REVIEW.md),
