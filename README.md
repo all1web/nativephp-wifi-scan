@@ -2,6 +2,8 @@
 
 **See the WiFi around you — from PHP.**
 
+![Every access point in range, read straight from Laravel](https://github.com/all1web/plugin-assets/raw/main/wifi-scan/hero.png)
+
 Scan the visible access points, read the one you're connected to, and turn what
 the radio can see into a stable fingerprint of *where the phone is*. All of it
 from Laravel, with no Kotlin.
@@ -10,6 +12,8 @@ from Laravel, with no Kotlin.
 $networks = Wifi::scan();   // every AP in range: ssid, bssid, rssi, frequency
 $here     = Wifi::current(); // the AP you're actually on
 ```
+
+![Radios in range → one call from PHP → a place you recognise](https://github.com/all1web/plugin-assets/raw/main/wifi-scan/flow.png)
 
 > **This is not the same as knowing you're "on WiFi."** The first-party
 > [`nativephp/mobile-network`](https://nativephp.com/plugins/nativephp/mobile-network)

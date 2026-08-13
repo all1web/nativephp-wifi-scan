@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 360" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="floorTop" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#1d2d4a"/>
+      <stop offset="1" stop-color="#121e34"/>
+    </linearGradient>
+    <linearGradient id="wallL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1526"/>
+      <stop offset="1" stop-color="#141f38"/>
+    </linearGradient>
+    <linearGradient id="wallR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0e1929"/>
+      <stop offset="1" stop-color="#182642"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shade" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <clipPath id="floorClip">
+      <polygon points="640,96 830,191 640,286 450,191"/>
+    </clipPath>
+  </defs>
+
+  <rect width="880" height="360" rx="18" fill="url(#bg)"/>
+
+  <!-- Left: the pitch -->
+  <text x="48" y="106" fill="#f8fafc" font-size="38" font-weight="700">See the WiFi</text>
+  <text x="48" y="152" fill="url(#accent)" font-size="38" font-weight="700">around you.</text>
+  <text x="48" y="194" fill="#94a3b8" font-size="17">Every access point in range — SSID, BSSID,</text>
+  <text x="48" y="220" fill="#94a3b8" font-size="17">signal — read straight from Laravel, and</text>
+  <text x="48" y="246" fill="#94a3b8" font-size="17">fingerprinted into a place you can recognise.</text>
+
+  <rect x="48" y="272" width="242" height="38" rx="10" fill="#020617" stroke="#334155"/>
+  <text x="66" y="296" fill="#38bdf8" font-size="15" font-family="Consolas, monospace">Wifi::scan();</text>
+
+  <!-- Right: isometric diorama -->
+
+  <!-- back walls, rising from the two far edges of the slab -->
+  <polygon points="450,191 640,96 640,58 450,153" fill="url(#wallL)"/>
+  <polygon points="640,96 830,191 830,153 640,58" fill="url(#wallR)"/>
+  <polyline points="450,153 640,58 830,153" fill="none" stroke="#23324e" stroke-width="1.2"/>
+  <line x1="640" y1="96" x2="640" y2="58" stroke="#23324e" stroke-width="1.2"/>
+
+  <!-- floor slab: side faces, then top -->
+  <polygon points="450,191 640,286 640,301 450,206" fill="#0a1322"/>
+  <polygon points="640,286 830,191 830,206 640,301" fill="#0d182b"/>
+  <polygon points="640,96 830,191 640,286 450,191" fill="url(#floorTop)"/>
+
+  <!-- floor grid -->
+  <g stroke="#22314e" stroke-width="1" opacity="0.5" clip-path="url(#floorClip)">
+    <line x1="545" y1="143.5" x2="735" y2="238.5"/>
+    <line x1="592.5" y1="119.75" x2="782.5" y2="214.75"/>
+    <line x1="497.5" y1="167.25" x2="687.5" y2="262.25"/>
+    <line x1="735" y1="143.5" x2="545" y2="238.5"/>
+    <line x1="782.5" y1="167.25" x2="592.5" y2="262.25"/>
+    <line x1="687.5" y1="119.75" x2="497.5" y2="214.75"/>
+  </g>
+
+  <!-- signal rings on the floor -->
+  <g clip-path="url(#floorClip)" fill="none" stroke-width="1.6">
+    <g stroke="#38bdf8">
+      <ellipse cx="600" cy="150" rx="30" ry="15" opacity="0.6"/>
+      <ellipse cx="600" cy="150" rx="58" ry="29" opacity="0.36"/>
+      <ellipse cx="600" cy="150" rx="88" ry="44" opacity="0.17"/>
+    </g>
+    <g stroke="#818cf8">
+      <ellipse cx="772" cy="190" rx="27" ry="13.5" opacity="0.55"/>
+      <ellipse cx="772" cy="190" rx="52" ry="26" opacity="0.32"/>
+      <ellipse cx="772" cy="190" rx="79" ry="39.5" opacity="0.15"/>
+    </g>
+    <g stroke="#38bdf8">
+      <ellipse cx="521" cy="208" rx="25" ry="12.5" opacity="0.5"/>
+      <ellipse cx="521" cy="208" rx="48" ry="24" opacity="0.28"/>
+      <ellipse cx="521" cy="208" rx="73" ry="36.5" opacity="0.13"/>
+    </g>
+  </g>
+
+  <!-- router A -->
+  <g>
+    <polygon points="600,130 614,137 600,144 586,137" fill="#3d5075"/>
+    <polygon points="586,137 600,144 600,154 586,147" fill="#19233d"/>
+    <polygon points="600,144 614,137 614,147 600,154" fill="#24334f"/>
+    <line x1="594" y1="134" x2="590" y2="123" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/>
+    <line x1="606" y1="134" x2="610" y2="123" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="600" cy="137" r="2.6" fill="#38bdf8" filter="url(#glow)"/>
+  </g>
+  <!-- router B -->
+  <g>
+    <polygon points="772,170 786,177 772,184 758,177" fill="#3d5075"/>
+    <polygon points="758,177 772,184 772,194 758,187" fill="#19233d"/>
+    <polygon points="772,184 786,177 786,187 772,194" fill="#24334f"/>
+    <line x1="766" y1="174" x2="762" y2="163" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/>
+    <line x1="778" y1="174" x2="782" y2="163" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="772" cy="177" r="2.6" fill="#818cf8" filter="url(#glow)"/>
+  </g>
+  <!-- router C -->
+  <g>
+    <polygon points="521,188 535,195 521,202 507,195" fill="#3d5075"/>
+    <polygon points="507,195 521,202 521,212 507,205" fill="#19233d"/>
+    <polygon points="521,202 535,195 535,205 521,212" fill="#24334f"/>
+    <line x1="515" y1="192" x2="511" y2="181" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/>
+    <line x1="527" y1="192" x2="531" y2="181" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="521" cy="195" r="2.6" fill="#38bdf8" filter="url(#glow)"/>
+  </g>
+
+  <!-- contact shadow under the phone -->
+  <ellipse cx="662" cy="244" rx="82" ry="42" fill="#050a14" opacity="0.75" filter="url(#shade)"/>
+
+  <!-- the phone, lying on the floor in isometric -->
+  <g transform="translate(690,186) matrix(1,0.5,-1,0.5,0,0)">
+    <g filter="url(#softglow)">
+      <rect x="0" y="0" width="68" height="128" rx="11" fill="#020617" stroke="#3b4a63" stroke-width="1.6"/>
+    </g>
+    <rect x="5" y="6" width="58" height="116" rx="7" fill="#0b1120"/>
+
+    <text x="11" y="21" fill="#7dd3fc" font-size="8" font-weight="700">NETWORKS</text>
+
+    <rect x="10" y="28" width="48" height="21" rx="4.5" fill="#16233c"/>
+    <text x="14" y="42" fill="#e2e8f0" font-size="7.4">office-5g</text>
+    <g fill="#38bdf8"><rect x="45" y="39" width="2.4" height="5"/><rect x="48.8" y="36.5" width="2.4" height="7.5"/><rect x="52.6" y="34" width="2.4" height="10"/></g>
+
+    <rect x="10" y="53" width="48" height="21" rx="4.5" fill="#16233c"/>
+    <text x="14" y="67" fill="#e2e8f0" font-size="7.4">cafe-wifi</text>
+    <g fill="#38bdf8"><rect x="45" y="64" width="2.4" height="5"/><rect x="48.8" y="61.5" width="2.4" height="7.5"/><rect x="52.6" y="59" width="2.4" height="10" opacity="0.24"/></g>
+
+    <rect x="10" y="78" width="48" height="21" rx="4.5" fill="#16233c"/>
+    <text x="14" y="92" fill="#e2e8f0" font-size="7.4">linksys</text>
+    <g fill="#38bdf8"><rect x="45" y="89" width="2.4" height="5"/><rect x="48.8" y="86.5" width="2.4" height="7.5" opacity="0.24"/><rect x="52.6" y="84" width="2.4" height="10" opacity="0.24"/></g>
+
+    <rect x="10" y="103" width="48" height="14" rx="4" fill="#0f2438" stroke="#1f4f6b" stroke-width="0.8"/>
+    <text x="14" y="113" fill="#38bdf8" font-size="6.8" font-family="Consolas, monospace">a3f9·c17d</text>
+  </g>
+
+  <!-- caption -->
+  <text x="832" y="322" fill="#7dd3fc" font-size="12.5" font-weight="600" text-anchor="end">3 radios in range → 1 place fingerprint</text>
+  <text x="832" y="339" fill="#64748b" font-size="11" text-anchor="end">no GPS, no battery drain, works indoors</text>
+</svg>
