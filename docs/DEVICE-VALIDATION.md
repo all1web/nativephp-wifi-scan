@@ -7,11 +7,18 @@ return nothing useful.
 This is the checklist we run before claiming the native layer works, written so
 anyone (including a contributor sending a native PR) can run it identically.
 
-> ⚠️ **Current status: not yet run.** As of v0.2.0 the native Android layer has
-> not been executed on a physical device. The PHP layer, bridge contract, and
-> fingerprint math are covered by 57 automated tests; the Kotlin is reviewed
-> against current Android documentation but unproven at runtime. Treat the
-> native paths as unvalidated until this document says otherwise.
+> ⚠️ **Current status: partially verified (2026-08-18).** The plugin has been
+> compiled into a real host app: the generated
+> `PluginBridgeFunctionRegistration.kt` maps all four bridge functions in the
+> `WifiFunctions.Scan(activity)` form, all five permissions merge into the
+> generated `AndroidManifest.xml`, and `assembleDebug` builds with **zero
+> warnings or errors from the plugin Kotlin**. That retires the
+> does-it-even-compile class of risk (check 1's build half).
+>
+> Checks 2–10 — runtime behaviour on a physical phone — remain outstanding.
+> The PHP layer, bridge contract, and fingerprint math are covered by 57
+> automated tests; treat the runtime native paths as unvalidated until this
+> document says otherwise.
 
 ## Setup
 
