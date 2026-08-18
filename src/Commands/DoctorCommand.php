@@ -68,6 +68,11 @@ class DoctorCommand extends Command
 
             if ($details['status'] === PermissionStatus::Granted) {
                 $this->passLine('Scan permission', 'granted ('.($details['requiredPermission'] ?? 'n/a').')');
+            } elseif ($details['status'] === PermissionStatus::Unknown && $details['requiredPermission'] === null) {
+                // The bridge function exists but returned nothing — host apps
+                // define nativephp_call() even off-device (Jump/desktop), where
+                // it no-ops. Not a failure; the real answer needs a phone.
+                $this->line('  <fg=gray>○ Scan permission</>    cannot be determined here (off-device / simulated bridge) — check on a real device');
             } else {
                 $this->warnLine('Scan permission', 'not granted — scan() returns an empty list without it', 'call Wifi::requestPermission() from a screen that explains why (see docs/STORE-REVIEW.md on prominent disclosure)');
                 $problems++;
