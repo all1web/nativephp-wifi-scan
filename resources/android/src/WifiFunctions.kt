@@ -265,6 +265,8 @@ object WifiFunctions {
                 Log.d(TAG, "startScan() returned false (throttled); serving cached results")
             }
 
+            Log.d(TAG, "Scan: cached=${cachedJson.length()} scanRequested=$started")
+
             return BridgeResponse.success(
                 mapOf(
                     "networks" to cachedJson.toString(),
@@ -319,6 +321,7 @@ object WifiFunctions {
             ActivityHolder.set(activity)
             val context = activity.applicationContext
             val granted = hasScanPermission(context)
+            Log.d(TAG, "CheckPermission: granted=$granted locationServices=${locationServicesEnabled(context)}")
             return BridgeResponse.success(
                 mapOf(
                     "status" to if (granted) "granted" else "denied",
