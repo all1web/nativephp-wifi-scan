@@ -7,18 +7,30 @@ return nothing useful.
 This is the checklist we run before claiming the native layer works, written so
 anyone (including a contributor sending a native PR) can run it identically.
 
-> ⚠️ **Current status: partially verified (2026-08-18).** The plugin has been
-> compiled into a real host app: the generated
-> `PluginBridgeFunctionRegistration.kt` maps all four bridge functions in the
-> `WifiFunctions.Scan(activity)` form, all five permissions merge into the
-> generated `AndroidManifest.xml`, and `assembleDebug` builds with **zero
-> warnings or errors from the plugin Kotlin**. That retires the
-> does-it-even-compile class of risk (check 1's build half).
+> ✅ **Current status: VALIDATED on hardware (2026-08-19).**
+> Device: Samsung Galaxy Z Fold 6 (SM-F956U), Android 16 (API 36) — i.e. the
+> modern `NEARBY_WIFI_DEVICES` permission path. Host: a production NativePHP
+> v4 (RC) Livewire app.
 >
-> Checks 2–10 — runtime behaviour on a physical phone — remain outstanding.
-> The PHP layer, bridge contract, and fingerprint math are covered by 57
-> automated tests; treat the runtime native paths as unvalidated until this
-> document says otherwise.
+> | # | Check | Result | Evidence |
+> |---|---|---|---|
+> | 1 | Bridge registration | ✅ | all four `Wifi.*` callable; generated registration compiles clean |
+> | 2 | Permission round trip | ✅ | revoked → page shows denied → system dialog → Allow → `granted=true` and a working scan 8 s later; already-held fast path dispatches `PermissionGranted` immediately |
+> | 3 | Location-services gate | ✅ read path | `locationServicesEnabled` reported correctly on every call; the toggle-off→empty-list behaviour is Android-documented but was not toggled in this pass |
+> | 4 | Cached scan | ✅ | real AP lists (12 → 18 → 23 entries) with correct SSID/BSSID/RSSI fields, strongest-first |
+> | 5 | Fresh scan event | ✅ | `NetworksScanned` delivered and cache repopulated; **a 4-tap burst produced exactly ONE event** — the v0.2.0 single-slot receiver verified under fire |
+> | 6 | Throttle behaviour | ✅ | screen-off / background scans refused with `scanRequested:false` and no phantom event; exactly 4 in-window foreground requests allowed |
+> | 7 | `current()` | ✅ visual | Connected card shows the associated SSID/BSSID on-screen |
+> | 8 | WiFi disabled | ⚪ skipped | toggling WiFi severs a wireless-adb rig; path is unit-covered (`ScanFailed('wifi_disabled')` + error envelope) — trivial to eyeball on any phone |
+> | 9 | Backgrounding | ✅ | dozens of doze/force-stop/relaunch cycles across the pass, zero crashes; screen-off scans degrade silently as designed |
+> | 10 | Release build (R8) | ⚪ not run | debug builds only so far; the keep-rule guidance in TROUBLESHOOTING stands until a minified pass is done |
+>
+> Denied-state behaviour got validated for free: a scan without the permission
+> dispatched `ScanFailed('permission')` and the PHP layer collapsed the error
+> envelope to an empty list — the page rendered fine, nothing threw.
+>
+> The checklist below remains the template for re-validation on other devices
+> and OEMs (behaviour varies — see PLATFORM-NOTES).
 
 ## Setup
 

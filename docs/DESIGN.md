@@ -150,8 +150,11 @@ shipped plugins (`orchestra/testbench ^10.0`, `pest ^2.7|^3.0|^4.0`).
   correct bridge function names dispatched.
 - Service provider bindings, aliases, config merge, facade resolution.
 
-**NOT verified — requires a physical Android device (emulators have no WiFi
-radio and return empty scans):**
+**Verified ON DEVICE (2026-08-19, Galaxy Z Fold 6 / Android 16):** the items
+below were the open list at v0.2.0 and have since been validated on hardware —
+full results with evidence in
+[DEVICE-VALIDATION.md](DEVICE-VALIDATION.md). Kept for the record of what
+needed a phone and why (emulators have no WiFi radio and return empty scans):
 
 1. That the four bridge functions register and are callable — i.e. that the
    `com.wifiscan.mobile.WifiFunctions.*` FQNs in `nativephp.json` match the

@@ -5,6 +5,29 @@ documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com); versions follow
 [semver](https://semver.org).
 
+## v0.2.1 — 2026-08-19
+
+**On-device validation pass.** The native layer ran on hardware — Samsung
+Galaxy Z Fold 6, Android 16 (API 36), inside a production NativePHP v4 host
+app. Results, per check with evidence:
+[docs/DEVICE-VALIDATION.md](docs/DEVICE-VALIDATION.md). Highlights: the full
+permission-dialog round trip, real scans (12–23 APs), fresh-scan events
+delivering, and the single-slot receiver holding **one** event under a 4-tap
+burst. Two items remain open and documented: the WiFi-off toggle (severs a
+wireless-adb rig; unit-covered) and a minified release build.
+
+### Added
+
+- Success-path debug logs on `Scan` / `CheckPermission` (`adb logcat -s
+  WifiScan`) — silence was previously indistinguishable from never-ran, which
+  is the wrong property for a support tool.
+
+### Fixed
+
+- `wifi-scan:doctor`: an undeterminable permission state off-device (host apps
+  define `nativephp_call()` even on desktop, where it no-ops) is now an
+  informational line instead of a failure.
+
 ## v0.2.0 — 2026-08-13
 
 **Now free and MIT-licensed.** No license key, no seat limits, no purchase step.
