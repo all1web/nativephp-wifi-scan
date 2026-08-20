@@ -48,6 +48,10 @@
         }
     },
 
+    "ios": {
+        "min_version": "13.0"
+    },
+
     "events": [
         "WifiScan\\Mobile\\Events\\NetworksScanned",
         "WifiScan\\Mobile\\Events\\ScanFailed",

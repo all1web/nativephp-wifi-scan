@@ -5,6 +5,17 @@ documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com); versions follow
 [semver](https://semver.org).
 
+## v0.2.2 — 2026-08-19
+
+**`native:plugin:validate` now passes.** v0.2.1 failed the marketplace
+validator with `Missing ios.min_version in nativephp.json` — the validator
+requires an `ios.min_version` for every plugin, Android-only ones included.
+The manifest now declares `"ios": {"min_version": "13.0"}`. Purely
+declarative: this plugin ships no iOS bridge targets and no `resources/ios`
+directory, so the iOS compiler continues to skip it entirely and no host
+app's deployment floor changes. Verified: the validator reports OK with zero
+warnings.
+
 ## v0.2.1 — 2026-08-19
 
 **On-device validation pass.** The native layer ran on hardware — Samsung
