@@ -1,5 +1,7 @@
 # 📡 WiFi Radar
 
+**For more info and documentation see:** [all1web.com/product/wifi-scan](https://all1web.com/product/wifi-scan)
+
 **See the WiFi around you — from PHP.** Free and MIT-licensed.
 
 ![Every access point in range, read straight from Laravel](https://github.com/all1web/plugin-assets/raw/main/wifi-scan/hero.png)
